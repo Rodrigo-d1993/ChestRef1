@@ -4,9 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.scheduler.BukkitTask;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -16,6 +17,7 @@ public class ChestManager {
     private final ChestRef plugin;
 
     private final Map<String, RefillableChest> chests = new HashMap<>();
+    private final Map<String, BukkitTask> activeRefillTasks = new HashMap<>();
 
     public void addChest(String id, RefillableChest chest) {
         chests.put(id, chest);
@@ -30,14 +32,20 @@ public class ChestManager {
     }
 
     public void registrarCofre(String id, Location location, long intervaloSegundos) {
-        // Obtenemos el contenido del cofre directamente desde la ubicación.
         if (location.getBlock().getType() == Material.CHEST) {
             org.bukkit.block.Chest chestBlock = (org.bukkit.block.Chest) location.getBlock().getState();
-            ItemStack[] contents = chestBlock.getInventory().getContents();  // Contenido real del cofre.
+            ItemStack[] originalContents = chestBlock.getInventory().getContents();
+            ItemStack[] contentsCopy = new ItemStack[originalContents.length];
 
-            // Creamos el RefillableChest con los datos proporcionados y el contenido obtenido.
-            RefillableChest chest = new RefillableChest(id, location, contents, intervaloSegundos);
+            for (int i = 0; i < originalContents.length; i++) {
+                ItemStack item = originalContents[i];
+                contentsCopy[i] = (item != null) ? item.clone() : null;
+            }
+
+            RefillableChest chest = new RefillableChest(id, location, contentsCopy, intervaloSegundos);
             chests.put(id, chest);
+            scheduleRefill(chest);
+            Bukkit.getLogger().info("Cofre '" + id + "' programado para recarga cada " + chest.getRefillInterval() + " segundos.");
         }
     }
 
@@ -125,6 +133,44 @@ public class ChestManager {
             chests.remove(id);
             saveChests();  // Guarda los cambios después de eliminar el cofre
             Bukkit.getLogger().info("Cofre '" + id + "' ha sido eliminado.");
+        }
+    }
+    public String getChestIdByLocation(Location location) {
+        for (Map.Entry<String, RefillableChest> entry : chests.entrySet()) {
+            if (entry.getValue().getLocation().equals(location)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+    public void scheduleRefill(RefillableChest chest) {
+        String chestId = chest.getId();
+
+        // Si ya hay una tarea programada, cancélala
+        if (activeRefillTasks.containsKey(chestId)) {
+            BukkitTask existingTask = activeRefillTasks.get(chestId);
+            if (existingTask != null) {
+                existingTask.cancel();
+            }
+        }
+
+        // Actualizar el tiempo de última interacción
+        chest.setLastInteractedTime(System.currentTimeMillis());
+
+        long delayTicks = chest.getRefillInterval() * 20L; // Convertir segundos a ticks
+
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            rellenarCofre(chestId);
+            activeRefillTasks.remove(chestId);
+        }, delayTicks);
+
+        activeRefillTasks.put(chestId, task);
+    }
+    public void cancelRefill(String chestId) {
+        BukkitTask task = activeRefillTasks.get(chestId);
+        if (task != null) {
+            task.cancel();
+            activeRefillTasks.remove(chestId);
         }
     }
 }

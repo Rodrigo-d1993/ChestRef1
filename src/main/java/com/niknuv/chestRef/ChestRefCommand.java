@@ -18,7 +18,7 @@ public class ChestRefCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(ChatColor.RED + "Uso: /chestrefill <add|fill> [argumentos]");
+            sender.sendMessage(ChatColor.RED + "Usa: /chestrefill <add|fill> [argumentos]");
             return true;
         }
 
@@ -26,13 +26,13 @@ public class ChestRefCommand implements CommandExecutor {
 
         if (subcommand.equals("fill")) {
             if (args.length < 2) {
-                sender.sendMessage(ChatColor.RED + "Uso: /chestrefill fill <id>");
+                sender.sendMessage(ChatColor.RED + "Usa: /chestrefill fill <id>");
                 return true;
             }
 
             String id = args[1];
             if (chestManager.getCofre(id) == null) {
-                sender.sendMessage(ChatColor.RED + "No existe un cofre con el ID '" + id + "'.");
+                sender.sendMessage(ChatColor.RED + "No existe un cofre con el nombre '" + id + "'.");
                 return true;
             }
 
@@ -42,7 +42,7 @@ public class ChestRefCommand implements CommandExecutor {
 
         } else if (subcommand.equals("add")) {
             if (args.length < 7) {
-                sender.sendMessage(ChatColor.RED + "Uso: /chestrefill add <id> <world> <x> <y> <z> <tiempoSegundos>");
+                sender.sendMessage(ChatColor.RED + "Usa: /chestrefill add <id> <world> <x> <y> <z> <tiempoSegundos>");
                 return true;
             }
 
@@ -89,11 +89,11 @@ public class ChestRefCommand implements CommandExecutor {
             // Registra el cofre con el contenido real
             chestManager.registrarCofre(id, location, tiempo);
 
-            sender.sendMessage(ChatColor.GREEN + "Cofre '" + id + "' registrado con éxito...");
+            sender.sendMessage(ChatColor.GREEN + "Cofre '" + id + "' registrado con éxito");
             return true;
         } else if (subcommand.equals("remove")) {
             if (args.length < 2) {
-                sender.sendMessage(ChatColor.RED + "Uso: /chestrefill remove <id>");
+                sender.sendMessage(ChatColor.RED + "Syntax: /chestrefill remove <id>");
                 return true;
             }
 
@@ -102,7 +102,7 @@ public class ChestRefCommand implements CommandExecutor {
             // Verificar si el cofre existe
             RefillableChest chest = chestManager.getCofre(id);
             if (chest == null) {
-                sender.sendMessage(ChatColor.RED + "El cofre con ID '" + id + "' no está registrado.");
+                sender.sendMessage(ChatColor.RED + "El cofre '" + id + "' no está registrado.");
                 return true;
             }
 

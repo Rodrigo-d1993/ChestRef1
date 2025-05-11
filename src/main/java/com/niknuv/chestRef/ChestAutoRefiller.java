@@ -21,7 +21,7 @@ public class ChestAutoRefiller extends BukkitRunnable {
             if (elapsed >= chest.getRefillInterval()) {
                 chestManager.rellenarCofre(chest.getId());
                 chest.setLastInteractedTime(currentTime); // Reiniciamos el tiempo
-                Bukkit.getLogger().info("Cofre '" + chest.getId() + "' fue rellenado automáticamente.");
+                //Bukkit.getLogger().info("Cofre '" + chest.getId() + "' fue rellenado automáticamente.");
             }
         }
     }
