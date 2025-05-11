@@ -1,0 +1,9 @@
+name: ChestRef
+version: '1.0-SNAPSHOT'
+main: com.niknuv.chestRef.ChestRef
+api-version: '1.18'
+commands:
+  chestrefill:
+    description: Registra cofres rellenables y ejecuta otras acciones.
+    usage: /chestrefill <subcomando>
+    permission: chestrefill.use
